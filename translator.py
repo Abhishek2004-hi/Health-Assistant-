@@ -1,12 +1,5 @@
-# translator.py
-# Translates health advice to any language
+import requests
 
-from googletrans import Translator
-
-# Create translator object
-translator = Translator()
-
-# Supported languages dictionary
 LANGUAGES = {
     "English": "en",
     "Hindi": "hi",
@@ -14,54 +7,30 @@ LANGUAGES = {
     "Tamil": "ta",
     "Telugu": "te",
     "Bengali": "bn",
-    "Gujarati": "gu",
     "Spanish": "es",
-    "French": "fr",
-    "Arabic": "ar"
+    "French": "fr"
 }
 
 def translate_text(text, target_language):
-    """
-    Translate text to target language
-    
-    Example:
-    text = "Take rest and drink water"
-    target = "Hindi"
-    returns = "आराम करें और पानी पिएं"
-    """
     try:
-        # Get language code
-        lang_code = LANGUAGES.get(
-            target_language, "en"
-        )
-        
-        # Translate
-        result = translator.translate(
-            text,
-            dest=lang_code
-        )
-        
-        return result.text
-        
+        lang_code = LANGUAGES.get(target_language, "en")
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {
+            "client": "gtx",
+            "sl": "auto",
+            "tl": lang_code,
+            "dt": "t",
+            "q": text
+        }
+        response = requests.get(url, params=params)
+        result = response.json()
+        return result[0][0][0]
     except Exception as e:
         return f"Translation Error: {str(e)}"
 
 def analyze_in_language(symptoms, language):
-    """
-    Analyze symptoms and return advice
-    in chosen language
-    """
     from health_helper import analyze_symptoms
-    
-    # Get English advice first
     english_advice = analyze_symptoms(symptoms)
-    
-    # Translate to chosen language
     if language != "English":
-        translated = translate_text(
-            english_advice,
-            language
-        )
-        return translated
-    
+        return translate_text(english_advice, language)
     return english_advice
