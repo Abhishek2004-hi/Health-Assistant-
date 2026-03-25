@@ -1,102 +1,65 @@
-# health_helper.py
-# Using Groq API instead of Ollama
-# Works on cloud deployment!
-
 import os
 import requests
-from groq import Groq
+from dotenv import load_dotenv
 
-# Get API key from environment
-client = Groq(
-    api_key=os.environ.get("GROQ_API_KEY")
-)
+load_dotenv()  # ← This loads your .env file
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def ask_groq(prompt):
-    """
-    Send question to Groq AI
-    Works online - no local install needed!
-    """
     try:
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1000
+            "max_tokens": 1000
+        }
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers=headers,
+            json=data
         )
-        return response.choices[0].message.content
+        return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
         return f"Error: {str(e)}"
 
-
 def analyze_symptoms(symptoms):
-    prompt = f"""
-    You are a helpful health assistant.
-    Patient symptoms: {symptoms}
-    
-    Please provide:
+    return ask_groq(f"""
+    You are a health assistant.
+    Symptoms: {symptoms}
+    Give:
     1. Possible causes
     2. Home remedies
-    3. Medicines to take
+    3. Medicines
     4. Warning signs
-    5. When to see a doctor
-    
-    Keep response simple and clear.
-    """
-    return ask_groq(prompt)
-
+    5. When to see doctor
+    """)
 
 def get_diet_advice(condition):
-    prompt = f"""
-    You are a nutrition expert.
+    return ask_groq(f"""
     Give diet advice for: {condition}
-    
-    Include:
-    1. Foods to eat
-    2. Foods to avoid
-    3. Sample meal plan
-    4. Important vitamins
-    """
-    return ask_groq(prompt)
-
+    Include foods to eat, avoid, meal plan.
+    """)
 
 def get_exercise_advice(condition):
-    prompt = f"""
-    You are a fitness expert.
-    Suggest exercises for: {condition}
-    
-    Include:
-    1. Best exercises
-    2. Exercises to avoid
-    3. Duration per day
-    4. Safety tips
-    """
-    return ask_groq(prompt)
-
+    return ask_groq(f"""
+    Give safe exercises for: {condition}
+    Include best exercises, duration, safety tips.
+    """)
 
 def check_medicine_info(medicine):
-    prompt = f"""
-    Give information about: {medicine}
-    
-    Include:
-    1. What it treats
-    2. Common dosage
-    3. Side effects
-    4. Warnings
-    
-    Always remind to consult doctor.
-    """
-    return ask_groq(prompt)
-
+    return ask_groq(f"""
+    Give information about medicine: {medicine}
+    Include usage, dosage, side effects, warnings.
+    """)
 
 def emergency_check(symptoms):
-    prompt = f"""
-    Check if these symptoms need emergency care:
-    {symptoms}
-    
-    Answer clearly:
-    - EMERGENCY or NOT EMERGENCY
-    - Reason
-    - What to do immediately
-    """
-    return ask_groq(prompt)
+    return ask_groq(f"""
+    Is this an emergency: {symptoms}
+    Answer EMERGENCY or NOT EMERGENCY with reason.
+    """)
