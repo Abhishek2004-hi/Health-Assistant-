@@ -64,4 +64,4 @@ def analyze_in_language(symptoms, language):
         )
         return translated
     
-    return english_adviceY
+    return english_advice
