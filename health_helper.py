@@ -74,6 +74,19 @@ def analyze_symptoms(symptoms, age, gender):
     Be clear and professional.
     """)
 
+def get_diet_advice(condition):
+    """
+    Returns diet advice based on health condition
+    """
+    diet_plans = {
+        "diabetes": "Avoid sugar, eat high fiber foods, whole grains, vegetables.",
+        "hypertension": "Reduce salt intake, eat fruits, vegetables, low-fat dairy.",
+        "obesity": "Low calorie diet, avoid junk food, eat more protein and fiber.",
+        "general": "Eat balanced diet with proteins, carbs, fats, vitamins and minerals."
+    }
+    
+    condition = condition.lower()
+    return diet_plans.get(condition, diet_plans["general"])
 
 def suggest_prescription(diagnosis, allergies):
     return ask_groq(f"""
