@@ -88,6 +88,20 @@ def get_diet_advice(condition):
     condition = condition.lower()
     return diet_plans.get(condition, diet_plans["general"])
 
+def get_exercise_advice(condition):
+    """
+    Returns exercise advice based on health condition
+    """
+    exercise_plans = {
+        "diabetes": "Walk 30 mins daily, light cardio, avoid intense workouts.",
+        "hypertension": "Light walking, yoga, swimming. Avoid heavy weightlifting.",
+        "obesity": "Start with walking, cycling, gradually increase intensity.",
+        "arthritis": "Low impact exercises, swimming, stretching, avoid jumping.",
+        "general": "30 mins moderate exercise 5 days a week, mix cardio and strength."
+    }
+
+    condition = condition.lower()
+    return exercise_plans.get(condition, exercise_plans["general"])
 def suggest_prescription(diagnosis, allergies):
     return ask_groq(f"""
     You are a medical AI.
