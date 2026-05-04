@@ -5,8 +5,10 @@ from health_helper import (
     analyze_symptoms,
     get_diet_advice,
     get_exercise_advice,
-    check_medicine_info,
-    emergency_check
+    suggest_prescription,
+    analyze_lab_report,
+    generate_discharge_summary,
+    check_medicine_info        # ← add this
 )
 from history_manager import (
     create_database,

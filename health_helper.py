@@ -136,6 +136,20 @@ def analyze_lab_report(test_name, result, normal_range):
     """)
 
 
+def check_medicine_info(medicine_name):
+    return ask_groq(f"""
+    Provide information about this medicine: {medicine_name}
+
+    Include:
+    1. What it is used for
+    2. Common dosage
+    3. Side effects
+    4. Precautions
+    5. Drug interactions to avoid
+
+    Use simple and clear language.
+    """)
+
 def generate_discharge_summary(
     patient_name, diagnosis,
     treatment, prescription, follow_up

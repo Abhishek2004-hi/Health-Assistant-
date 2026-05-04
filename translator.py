@@ -28,9 +28,26 @@ def translate_text(text, target_language):
     except Exception as e:
         return f"Translation Error: {str(e)}"
 
-def analyze_in_language(symptoms, language):
-    from health_helper import analyze_symptoms
-    english_advice = analyze_symptoms(symptoms)
-    if language != "English":
-        return translate_text(english_advice, language)
-    return english_advice
+from health_helper import ask_groq, analyze_symptoms
+
+def analyze_in_language(symptoms, language, age=25, gender="unknown"):
+    """
+    Analyze symptoms and return result in selected language
+    """
+    # Get english analysis first
+    english_advice = analyze_symptoms(symptoms, age, gender)
+    
+    # If language is English, return directly
+    if language.lower() == "english":
+        return english_advice
+    
+    # Translate to selected language
+    translated = ask_groq(f"""
+    Translate the following medical advice to {language}.
+    Keep all medical terms accurate.
+    
+    Text to translate:
+    {english_advice}
+    """)
+    
+    return translated
