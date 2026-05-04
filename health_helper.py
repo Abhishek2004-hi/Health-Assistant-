@@ -1,13 +1,19 @@
+# ai_helper.py
 import os
 import requests
 from dotenv import load_dotenv
 
-load_dotenv()  # ← This loads your .env file
+load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def ask_groq(prompt):
+    """Send question to Groq AI"""
     try:
+        # Check if API key exists
+        if not GROQ_API_KEY:
+            return "❌ Error: GROQ_API_KEY not found! Please add it to .env file"
+
         headers = {
             "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json"
@@ -15,51 +21,107 @@ def ask_groq(prompt):
         data = {
             "model": "llama-3.3-70b-versatile",
             "messages": [
-                {"role": "user", "content": prompt}
+                {
+                    "role": "user",
+                    "content": prompt
+                }
             ],
             "max_tokens": 1000
         }
+
         response = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
             headers=headers,
-            json=data
+            json=data,
+            timeout=30
         )
-        return response.json()["choices"][0]["message"]["content"]
+
+        # Debug - check response
+        if response.status_code != 200:
+            return f"❌ API Error {response.status_code}: {response.text}"
+
+        result = response.json()
+
+        # Check if choices exists
+        if "choices" not in result:
+            return f"❌ Unexpected response: {result}"
+
+        return result["choices"][0]["message"]["content"]
+
+    except requests.exceptions.Timeout:
+        return "❌ Request timed out! Try again."
+    except requests.exceptions.ConnectionError:
+        return "❌ No internet connection!"
+    except KeyError as e:
+        return f"❌ Key error: {str(e)}"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"❌ Error: {str(e)}"
 
-def analyze_symptoms(symptoms):
+
+def analyze_symptoms(symptoms, age, gender):
     return ask_groq(f"""
-    You are a health assistant.
+    You are a medical AI assistant.
+    Patient: {age} year old {gender}
     Symptoms: {symptoms}
-    Give:
-    1. Possible causes
-    2. Home remedies
-    3. Medicines
-    4. Warning signs
-    5. When to see doctor
+
+    Provide:
+    1. Possible diagnoses (3-5)
+    2. Recommended tests
+    3. Immediate care steps
+    4. Red flags to watch
+    5. Specialist to consult
+
+    Be clear and professional.
     """)
 
-def get_diet_advice(condition):
+
+def suggest_prescription(diagnosis, allergies):
     return ask_groq(f"""
-    Give diet advice for: {condition}
-    Include foods to eat, avoid, meal plan.
+    You are a medical AI.
+    Diagnosis: {diagnosis}
+    Patient allergies: {allergies}
+
+    Suggest:
+    1. Medicines (generic names)
+    2. Dosage for each
+    3. Duration
+    4. Precautions
+    5. Lifestyle advice
+
+    Note: Doctor must verify before giving.
     """)
 
-def get_exercise_advice(condition):
+
+def analyze_lab_report(test_name, result, normal_range):
     return ask_groq(f"""
-    Give safe exercises for: {condition}
-    Include best exercises, duration, safety tips.
+    Analyze this lab report:
+    Test: {test_name}
+    Result: {result}
+    Normal Range: {normal_range}
+
+    Explain:
+    1. Is result normal or abnormal?
+    2. What does this mean?
+    3. What action needed?
+    4. How serious is it?
+
+    Use simple language.
     """)
 
-def check_medicine_info(medicine):
-    return ask_groq(f"""
-    Give information about medicine: {medicine}
-    Include usage, dosage, side effects, warnings.
-    """)
 
-def emergency_check(symptoms):
+def generate_discharge_summary(
+    patient_name, diagnosis,
+    treatment, prescription, follow_up
+):
     return ask_groq(f"""
-    Is this an emergency: {symptoms}
-    Answer EMERGENCY or NOT EMERGENCY with reason.
+    Generate professional discharge summary:
+
+    Patient: {patient_name}
+    Diagnosis: {diagnosis}
+    Treatment given: {treatment}
+    Prescription: {prescription}
+    Follow-up: {follow_up}
+
+    Format as official medical document.
+    Include all important instructions.
     """)

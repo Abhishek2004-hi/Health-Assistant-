@@ -410,9 +410,7 @@ elif option == "🌍 Language Support":
     if st.button("🌍 Get Advice in Your Language"):
         if symptoms:
             with st.spinner("Translating..."):
-                result = analyze_in_language(
-                    symptoms, language
-                )
+                result = analyze_in_language(symptoms, language)
             st.success("✅ Response Ready!")
             st.write(result)
         else:
